@@ -1,5 +1,5 @@
 
-# latest java JDK image (build by Eclipse Foundation)
+# base our image on the latest JDK image (build by Eclipse Foundation)
 FROM eclipse-temurin:latest
 
 # execution dir in container
