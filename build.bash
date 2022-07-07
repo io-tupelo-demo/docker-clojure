@@ -3,5 +3,6 @@
 lein clean
 lein uberjar
 
-docker build . -t demo-clj
+# build the Docker image `demo-clj-image` for our Clojure app
+docker build . --tag demo-clj-image
 

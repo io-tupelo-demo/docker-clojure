@@ -1,9 +1,16 @@
 
+# latest java JDK image (build by Eclipse Foundation)
 FROM eclipse-temurin:latest
 
-WORKDIR /
+# execution dir in container
+RUN  mkdir  /app
 
-COPY  target/uberjar/demo-0.1.0-SNAPSHOT-standalone.jar  demo.jar
+# copy uberjar from host location in container
+COPY  target/uberjar/demo-0.1.0-SNAPSHOT-standalone.jar  /app/demo.jar
 
+# `cd /app` in the container
+WORKDIR /app
+
+# start JVM in container
 CMD java -jar demo.jar
 
