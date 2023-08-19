@@ -75,12 +75,64 @@ Docker version 20.10.14, build a224086
 
 == Running the code via Docker
 
-From the command line type:
+First, build a Uberjar from the command line and include it into a Docker image:
 
-```bash
-> build.bash
-> run.bash
-> clean.bash
+```
+~/io-tupelo-demo/docker-clojure > ./build.bash 
+
+lein clean
+lein uberjar
+Compiling demo.core
+Created /home/alan/io-tupelo-demo/docker-clojure/target/uberjar/demo-0.1.0-SNAPSHOT.jar
+Created /home/alan/io-tupelo-demo/docker-clojure/target/uberjar/demo-0.1.0-SNAPSHOT-standalone.jar
+
+# build the Docker image `demo-clj-image` for our Clojure app
+docker build . --tag demo-clj-image
+Sending build context to Docker daemon  32.59MB
+Step 1/5 : FROM eclipse-temurin:latest
+ ---> 1f932dbcafca
+Step 2/5 : RUN  mkdir  /app
+ ---> Using cache
+ ---> bb9f8397773b
+Step 3/5 : COPY  target/uberjar/demo-0.1.0-SNAPSHOT-standalone.jar  /app/demo.jar
+ ---> 1cef460d8ba9
+Step 4/5 : WORKDIR /app
+ ---> Running in 23d4209d3908
+Removing intermediate container 23d4209d3908
+ ---> 922260f20169
+Step 5/5 : CMD java -jar demo.jar
+ ---> Running in bd8dd45f86a6
+Removing intermediate container bd8dd45f86a6
+ ---> c1a79f6f12b6
+Successfully built c1a79f6f12b6
+Successfully tagged demo-clj-image:latest
+```
+
+Next, use Docker to run the image in a container:
+
+```
+~/io-tupelo-demo/docker-clojure > ./run.bash 
+
+# run the Docker image `demo-clj-image` with the name `demo-clj-container`
+docker run  --name demo-clj-container  demo-clj-image
+Hello, World! Again!
+```
+
+Cleanup the container when finished:
+
+```
+~/io-tupelo-demo/docker-clojure > ./clean.bash 
+
+# terminate and delete the running container
+docker rm --force demo-clj-container
+demo-clj-container
+# remove the docker image
+docker image rm --force demo-clj-image
+Untagged: demo-clj-image:latest
+Deleted: sha256:c1a79f6f12b6cdbe02afff85af3ffc40b6857333d95004d2587314c7e259fcca
+Deleted: sha256:922260f20169e22879415d4af4ba07553ff50e4663cb996812755d8ddd4bcb72
+Deleted: sha256:1cef460d8ba9d40112c7dc843acab2009dfef8db258274d4d660697fa7bf3649
+Deleted: sha256:b6ac5bbd5396c6c3dad768092ee2b24c47893bd02aa5fc35b6e9309fa1d2b0dd
 ```
 
 == Running Unit Tests - Plain (non-Docker)
@@ -109,88 +161,9 @@ Ran 4 tests containing 6 assertions.
 
 I do the above so often that I have a Bash/Zsh alias set up:
 
-```bash
+```pre
 alias lct="time (lein do clean, test)"       # lct => Lein Clean Test
 ```
-
-== Running Unit Tests with `lein test-refresh` (non-Docker)
-
-IMHO, https://github.com/jakemcc/lein-test-refresh[the lein-test-refresh project] provides the best way of doing
-iterative development in Clojure, re-running unit tests every time you save a source file from the editor.
-
-```pre
-> lein test-refresh
-```
-
-or make an alias:
-
-```bash
-alias lctr="lein do clean, test-refresh"    # lctr => Lein Clean Test-Refresh
-```
-
-with result:
-
-```pre
-Testing _bootstrap
--------------------------------
-   Clojure 1.10.1    Java 13
--------------------------------
-
-Testing tst.demo.core
-result => "Hello, World!\n"
-
-Ran 4 tests containing 6 assertions.
-0 failures, 0 errors.
-
-Passed all tests
-Finished at 07:56:48.252 (run time: 6.709s)
-...
-```
-
-in this instance, the test output pauses after printing the elapsed time, and waits to re-run
-upon any file change. For example, make a simple change in the namespace `demo.core`  by adding
-the word "Again!" to the `println` expression, and watch as the tests are automatically re-run:
-
-```pre
-...
-Testing tst.demo.core
-result => "Hello, World! Again!\n"
-...
-Finished at 07:59:53.863 (run time: 0.034s)
-```
-
-Note that the tests were all re-run in only 34 milliseconds (nearly instantaneous), since the JVM was already
-started and Clojure itself (plus library code) has already been compiled.
-
-=== Using "Focus" Mode
-
-Change one of the `dotest` forms in `tst.demo.core` to `dotest-focus`.  If there is at least one `dotest-focus` present
-in the project, then ***only*** the "focus" tests will be run.  This is helpful when you want to
-temporarily focus on a specific feature, without the distraction of all the other tests runnning.
-
-Note that only `lein test-refresh` (i.e. `lctr`) will honor the `focus` mode; `lein test` (i.e. `lct`) will always run all tests.
-
-== Keeping Dependency Versions Up-To-Date
-
-This project includes the `lein-ancient` plugin, which will tell you if any of your dependency
-libraries are out of date. I have an alias:
-
-```bash
-alias laca="lein ancient check :all"
-```
-
-which will give you a list of version updates you should make, or just
-
-```pre
-all artifacts are up-to-date.
-```
-
-if you are already up-to-date on everything.
-
-== Plumatic Schema
-
-The function `demo.core/add2` shows the usage of https://github.com/plumatic/schema[Plumatic Schema] to document
-function argument types and return value type.  This is a lifesaver!
 
 == Documentation
 
