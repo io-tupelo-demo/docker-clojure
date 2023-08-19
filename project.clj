@@ -6,8 +6,8 @@
 
   :dependencies [
                  [org.clojure/clojure "1.11.1"]
-                 [prismatic/schema "1.2.1"]
-                 [tupelo "22.05.24b"]
+                 [prismatic/schema "1.4.1"]
+                 [tupelo "23.07.04"]
                  ]
   :plugins [
             [com.jakemccrary/lein-test-refresh "0.25.0"]

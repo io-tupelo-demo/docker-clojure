@@ -1,4 +1,6 @@
-#!/bin/bash -v
+#!/bin/bash 
+
+set -v
 
 lein clean
 lein uberjar

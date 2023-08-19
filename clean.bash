@@ -1,4 +1,6 @@
-#!/bin/bash -v
+#!/bin/bash 
+
+set -v
 
 # terminate and delete the running container
 docker rm --force demo-clj-container
